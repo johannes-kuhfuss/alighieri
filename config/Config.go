@@ -4,6 +4,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -33,23 +34,27 @@ type AppConfig struct {
 		LogToLogger  bool   `envconfig:"LOG_TO_LOGGER" default:"false"`
 	}
 	DeviceScan struct {
-		ScanCycleSec  int `envconfig:"SCAN_CYCLE_SEC" default:"30"`
-		DeviceScanRun bool
+		ScanCycleSec   int    `envconfig:"SCAN_CYCLE_SEC" default:"30"`
+		ScanTimeOutSec int    `envconfig:"SCAN_TIME_OUT_SEC" default:"5"`
+		InterfaceName  string `envconfig:"INTERFACE_NAME"`
+		ServiceName    string `envconfig:"SERVICE_NAME" default:"_services._dns-sd._udp"` //_netaudio-chan._udp
+		DeviceScanRun  bool
 	}
 	Misc struct {
 	}
 	Metrics struct {
 	}
 	RunTime struct {
-		Mu                 sync.Mutex
-		Router             *gin.Engine
-		BgJobs             *cron.Cron
-		ListenAddr         string
-		StartDate          time.Time
-		DeviceScanNumber   int
-		LastDeviceScanDate time.Time
-		DevicesInList      int
-		DeviceScanRunning  bool
+		Mu                  sync.Mutex
+		Router              *gin.Engine
+		BgJobs              *cron.Cron
+		ListenAddr          string
+		StartDate           time.Time
+		DeviceScanInterface *net.Interface
+		DeviceScanNumber    int
+		LastDeviceScanDate  time.Time
+		DevicesInList       int
+		DeviceScanRunning   bool
 	}
 }
 

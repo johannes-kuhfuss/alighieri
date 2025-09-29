@@ -2,11 +2,14 @@
 package service
 
 import (
+	"net"
 	"time"
 
+	"github.com/hashicorp/mdns"
 	"github.com/johannes-kuhfuss/alighieri/config"
 	"github.com/johannes-kuhfuss/alighieri/repositories"
 	"github.com/johannes-kuhfuss/services_utils/logger"
+	defaultroute "github.com/nixigaj/go-default-route"
 )
 
 type DeviceScanService interface {
@@ -20,8 +23,31 @@ type DefaultDeviceScanService struct {
 	Repo *repositories.DefaultDeviceRepository
 }
 
+func selectNetworkInterface(cfg *config.AppConfig) {
+	logger.Info("Determining network interface...")
+	if cfg.DeviceScan.InterfaceName != "" {
+		logger.Infof("Trying to find interface with name %v", cfg.DeviceScan.InterfaceName)
+		iface, err := net.InterfaceByName(cfg.DeviceScan.InterfaceName)
+		if err != nil {
+			logger.Errorf("Could not find interface with name %v. Using default interface.", cfg.DeviceScan.InterfaceName)
+		} else {
+			logger.Infof("Found interface with name %v", cfg.DeviceScan.InterfaceName)
+			cfg.RunTime.DeviceScanInterface = iface
+			return
+		}
+	}
+	defIface, err := defaultroute.DefaultRouteInterface()
+	if err != nil {
+		logger.Error("Could not find default interface. Giving up...", err)
+	} else {
+		cfg.RunTime.DeviceScanInterface = defIface
+	}
+	logger.Infof("Using network interface %v", cfg.RunTime.DeviceScanInterface.Name)
+}
+
 // NewDeviceScanService creates a new device scan service and injects its dependencies
 func NewDeviceScanService(cfg *config.AppConfig, repo *repositories.DefaultDeviceRepository) DefaultDeviceScanService {
+	selectNetworkInterface(cfg)
 	return DefaultDeviceScanService{
 		Cfg:  cfg,
 		Repo: repo,
@@ -40,7 +66,7 @@ func (s DefaultDeviceScanService) ScanRun() error {
 	s.Cfg.RunTime.DeviceScanNumber++
 	s.Cfg.RunTime.LastDeviceScanDate = time.Now()
 	s.Cfg.RunTime.DeviceScanRunning = true
-	logger.Infof("Starting device scan run #%v on network interface XXX.", s.Cfg.RunTime.DeviceScanNumber)
+	logger.Infof("Starting device scan run #%v on network interface %v.", s.Cfg.RunTime.DeviceScanNumber, s.Cfg.RunTime.DeviceScanInterface.Name)
 	start := time.Now().UTC()
 	deviceCount, err := s.scanDevices()
 	if err != nil {
@@ -58,5 +84,32 @@ func (s DefaultDeviceScanService) ScanRun() error {
 }
 
 func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
-	return 0, nil
+	var (
+		numEntries int
+	)
+	entriesCh := make(chan *mdns.ServiceEntry, 32)
+	go func() {
+		for entry := range entriesCh {
+			numEntries++
+			logger.Infof("Found device %v\r\n", entry.Name)
+		}
+	}()
+	queryParams := &mdns.QueryParam{
+		Service:             s.Cfg.DeviceScan.ServiceName,
+		Domain:              "local",
+		Timeout:             time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
+		Interface:           s.Cfg.RunTime.DeviceScanInterface,
+		Entries:             entriesCh,
+		WantUnicastResponse: false, //RFC 5.4
+		DisableIPv4:         false,
+		DisableIPv6:         true,
+		//Logger:
+	}
+	err = mdns.Query(queryParams)
+	if err != nil {
+		logger.Errorf("Error while querying audio devices: %v", err)
+		return 0, err
+	}
+	close(entriesCh)
+	return numEntries, nil
 }

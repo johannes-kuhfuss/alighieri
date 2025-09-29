@@ -26,6 +26,9 @@ type ConfigResp struct {
 	LastDeviceScanDate         string
 	DevicesInList              string
 	DeviceScanRunning          string
+	DeviceScanTimeOut          string
+	DeviceScanInterfaceName    string
+	DeviceScanServiceName      string
 }
 
 // setStartDate sets the service start date and adds the run duration
@@ -78,6 +81,9 @@ func GetConfig(cfg *config.AppConfig) (resp ConfigResp) {
 		LastDeviceScanDate:         convertDate(cfg.RunTime.LastDeviceScanDate),
 		DevicesInList:              strconv.Itoa(cfg.RunTime.DevicesInList),
 		DeviceScanRunning:          strconv.FormatBool(cfg.RunTime.DeviceScanRunning),
+		DeviceScanTimeOut:          strconv.Itoa(cfg.DeviceScan.ScanTimeOutSec),
+		DeviceScanInterfaceName:    cfg.RunTime.DeviceScanInterface.Name,
+		DeviceScanServiceName:      cfg.DeviceScan.ServiceName,
 	}
 	resp.StartDate = setStartDate(cfg.RunTime.StartDate)
 	if cfg.Server.Host == "" {
