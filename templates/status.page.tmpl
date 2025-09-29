@@ -19,8 +19,24 @@
                           <td>{{ .configdata.LogFile }}</td>
                         </tr>
                         <tr>
-                          <td>Service Start Date</td>
-                          <td>{{ .configdata.StartDate }}</td>
+                          <td>Scan Cycle Time in Seconds</td>
+                          <td>{{ .configdata.ScanCycleSec }}</td>
+                        </tr>
+                        <tr>
+                          <td>Number of device scans executed</td>
+                          <td>{{ .configdata.DeviceScanNumber }}</td>
+                        </tr>
+                        <tr>
+                          <td>Last Device Scan Date</td>
+                          <td>{{ .configdata.LastDeviceScanDate }}</td>
+                        </tr>
+                        <tr>
+                          <td>Number of Audio Devices in List</td>
+                          <td>{{ .configdata.DevicesInList }}</td>
+                        </tr>
+                        <tr>
+                          <td>Device Scan Running</td>
+                          <td>{{ .configdata.DeviceScanRunning }}</td>
                         </tr>
                     </tbody>
                 </table>

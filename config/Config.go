@@ -32,16 +32,24 @@ type AppConfig struct {
 		TemplatePath string `envconfig:"TEMPLATE_PATH" default:"./templates/"`
 		LogToLogger  bool   `envconfig:"LOG_TO_LOGGER" default:"false"`
 	}
+	DeviceScan struct {
+		ScanCycleSec  int `envconfig:"SCAN_CYCLE_SEC" default:"30"`
+		DeviceScanRun bool
+	}
 	Misc struct {
 	}
 	Metrics struct {
 	}
 	RunTime struct {
-		Mu         sync.Mutex
-		Router     *gin.Engine
-		BgJobs     *cron.Cron
-		ListenAddr string
-		StartDate  time.Time
+		Mu                 sync.Mutex
+		Router             *gin.Engine
+		BgJobs             *cron.Cron
+		ListenAddr         string
+		StartDate          time.Time
+		DeviceScanNumber   int
+		LastDeviceScanDate time.Time
+		DevicesInList      int
+		DeviceScanRunning  bool
 	}
 }
 
@@ -79,6 +87,7 @@ func checkFilePath(filePath *string) {
 
 // setDefaults sets defaults for some configurations items
 func setDefaults(config *AppConfig) {
+	config.DeviceScan.DeviceScanRun = true
 }
 
 // loadConfig loads the configuration from file. Returns an error if loading fails

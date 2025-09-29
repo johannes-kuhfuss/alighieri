@@ -21,6 +21,11 @@ type ConfigResp struct {
 	GinMode                    string
 	StartDate                  string
 	LogFile                    string
+	ScanCycleSec               string
+	DeviceScanNumber           string
+	LastDeviceScanDate         string
+	DevicesInList              string
+	DeviceScanRunning          string
 }
 
 // setStartDate sets the service start date and adds the run duration
@@ -68,6 +73,11 @@ func GetConfig(cfg *config.AppConfig) (resp ConfigResp) {
 		ServerKeyFile:              cfg.Server.KeyFile,
 		GinMode:                    cfg.Gin.Mode,
 		LogFile:                    formatLogFile(cfg.Server.LogFile),
+		ScanCycleSec:               strconv.Itoa(cfg.DeviceScan.ScanCycleSec),
+		DeviceScanNumber:           strconv.Itoa(cfg.RunTime.DeviceScanNumber),
+		LastDeviceScanDate:         convertDate(cfg.RunTime.LastDeviceScanDate),
+		DevicesInList:              strconv.Itoa(cfg.RunTime.DevicesInList),
+		DeviceScanRunning:          strconv.FormatBool(cfg.RunTime.DeviceScanRunning),
 	}
 	resp.StartDate = setStartDate(cfg.RunTime.StartDate)
 	if cfg.Server.Host == "" {

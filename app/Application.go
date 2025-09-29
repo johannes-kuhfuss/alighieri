@@ -17,6 +17,7 @@ import (
 	"github.com/johannes-kuhfuss/alighieri/config"
 	"github.com/johannes-kuhfuss/alighieri/handlers"
 	"github.com/johannes-kuhfuss/alighieri/repositories"
+	"github.com/johannes-kuhfuss/alighieri/service"
 	"github.com/johannes-kuhfuss/services_utils/date"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -31,6 +32,7 @@ var (
 	cancel         context.CancelFunc
 	statsUiHandler handlers.StatsUiHandler
 	deviceRepo     repositories.DefaultDeviceRepository
+	scanService    service.DefaultDeviceScanService
 )
 
 // StartApp orchestrates the startup of the application
@@ -56,6 +58,7 @@ func StartApp() {
 	scheduleBgJobs()
 	go startServer()
 	go updateMetrics()
+	go scanService.Scan()
 
 	<-appEnd
 	cleanUp()
@@ -129,6 +132,7 @@ func initServer() {
 func wireApp() {
 	deviceRepo = repositories.NewDeviceRepository(&cfg)
 	statsUiHandler = handlers.NewStatsUiHandler(&cfg, &deviceRepo)
+	scanService = service.NewDeviceScanService(&cfg, &deviceRepo)
 }
 
 // mapUrls defines the handlers for the available URLs
@@ -175,6 +179,7 @@ func startServer() {
 // cleanUp tries to clean up when the program is stopped
 func cleanUp() {
 	logger.Info("Cleaning up...")
+	cfg.DeviceScan.DeviceScanRun = false
 	cfg.RunTime.BgJobs.Stop()
 	shutdownTime := time.Duration(cfg.Server.GracefulShutdownTime) * time.Second
 	ctx, cancel = context.WithTimeout(context.Background(), shutdownTime)
