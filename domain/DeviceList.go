@@ -2,12 +2,28 @@
 package domain
 
 import (
+	"net"
 	"sync"
+	"time"
 )
 
 // DeviceInfo defines the information maintained per device entry
 type DeviceInfo struct {
-	Name string
+	Name          string
+	FullName      string
+	HostName      string
+	IPv4          net.IP
+	Port          int
+	Id            string
+	Process       string
+	CmcpVersion   string
+	CmcpMin       string
+	ServerVersion string
+	Channels      string
+	Manufacturer  string
+	Model         string
+	FirstSeen     time.Time
+	LastSeen      time.Time
 }
 
 type DeviceList []DeviceInfo

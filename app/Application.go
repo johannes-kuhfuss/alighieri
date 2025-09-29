@@ -134,6 +134,7 @@ func wireApp() {
 // mapUrls defines the handlers for the available URLs
 func mapUrls() {
 	cfg.RunTime.Router.GET("/", statsUiHandler.StatusPage)
+	cfg.RunTime.Router.GET("/devicelist", statsUiHandler.DeviceListPage)
 	cfg.RunTime.Router.GET("/logs", statsUiHandler.LogsPage)
 	cfg.RunTime.Router.GET("/about", statsUiHandler.AboutPage)
 	cfg.RunTime.Router.GET("/metrics", gin.WrapH(promhttp.Handler()))

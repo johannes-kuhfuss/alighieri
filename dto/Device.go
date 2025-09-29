@@ -2,32 +2,44 @@
 package dto
 
 import (
+	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
+	"github.com/johannes-kuhfuss/alighieri/domain"
 	"github.com/johannes-kuhfuss/alighieri/repositories"
 )
 
-// DeviceResp defines the data to be displayed in the file list
+// DeviceResp defines the data to be displayed in the device list
 type DeviceResp struct {
-	Name string
+	Name         string
+	FullName     string
+	HostName     string
+	IPv4         string
+	Port         string
+	Manufacturer string
+	Model        string
+	Info         string
+	FirstSeen    string
+	LastSeen     string
 }
-
-/*
-func formatTime(t1 time.Time) string {
-	if t1.IsZero() {
-		return "N/A"
-	}
-	return t1.Format("15:04")
-}
-*/
 
 // GetDevices retrives all devices maintained in the repository and formats them for display purposes
 func GetDevices(repo *repositories.DefaultDeviceRepository) (deviceDta []DeviceResp) {
 	if devices := repo.GetAll(); devices != nil {
 		for _, device := range *devices {
 			dta := DeviceResp{
-				Name: device.Name,
+				Name:         device.Name,
+				FullName:     device.FullName,
+				HostName:     device.HostName,
+				IPv4:         device.IPv4.String(),
+				Port:         strconv.Itoa(device.Port),
+				Manufacturer: device.Manufacturer,
+				Model:        device.Model,
+				Info:         combineInfo(device),
+				FirstSeen:    device.FirstSeen.Format("2006-01-02 15:04:05"),
+				LastSeen:     device.LastSeen.Format("2006-01-02 15:04:05"),
 			}
 			deviceDta = append(deviceDta, dta)
 		}
@@ -40,4 +52,8 @@ func GetDevices(repo *repositories.DefaultDeviceRepository) (deviceDta []DeviceR
 		}
 	})
 	return
+}
+
+func combineInfo(device domain.DeviceInfo) string {
+	return fmt.Sprintf("Id: %s, Process: %s, CMCP Version: %s, CMCP Min: %s, Server Version: %s, Channels: %s", device.Id, device.Process, device.CmcpVersion, device.CmcpMin, device.ServerVersion, device.Channels)
 }
