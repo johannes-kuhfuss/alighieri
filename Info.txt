@@ -1,0 +1,19 @@
+Each device can be found using mDNS and filtering the service type to one of the following:
+
+    _netaudio-cmc._udp
+    _netaudio-dbc._udp
+    _netaudio-arc._udp
+    _netaudio-chan._udp
+
+Most of these describe the device, but _netaudio-chan._udp describes individual channels. It isn't present on all hardware. The ports used by each service are described here.
+
+Some commmon examples of ports used are these:
+
+    24440 (Audio control, VIA)
+    24455 (Audio control, VIA)
+    4440 (Audio control)
+    4455 (Audio control)
+    8800 (Control & Monitoring)
+    8700 (Device settings such as sample rate, encoding, level control)
+
+The ports for routing are the audio control ones (_netaudio-arc._udp). Port 8700 isn't advertised as a mNDS service.

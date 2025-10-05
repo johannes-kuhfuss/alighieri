@@ -4,10 +4,12 @@ package service
 import (
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/mdns"
 	"github.com/johannes-kuhfuss/alighieri/config"
+	"github.com/johannes-kuhfuss/alighieri/domain"
 	"github.com/johannes-kuhfuss/alighieri/repositories"
 	"github.com/johannes-kuhfuss/services_utils/logger"
 	defaultroute "github.com/nixigaj/go-default-route"
@@ -93,6 +95,12 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 		for entry := range entriesCh {
 			numEntries++
 			logger.Infof("Found device %v\r\n", entry.Name)
+			device, err := convertEntry(*entry)
+			if err != nil {
+				logger.Error("Could not convert entry to device", err)
+			} else {
+				s.storeDevice(device)
+			}
 		}
 	}()
 	ll := log.New(logger.GetLogger(), "mdns", 0)
@@ -114,4 +122,61 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 	}
 	close(entriesCh)
 	return numEntries, nil
+}
+
+func convertEntry(e mdns.ServiceEntry) (dev domain.DeviceInfo, err error) {
+	d := domain.DeviceInfo{
+		IPv4:      e.AddrV4,
+		Port:      e.Port,
+		FirstSeen: time.Now(),
+		LastSeen:  time.Now(),
+	}
+	d.FullName = strings.TrimSuffix(e.Name, ".")
+	d.HostName = strings.TrimSuffix(e.Host, ".")
+	d.Name = shorten(e.Host)
+	for _, info := range e.InfoFields {
+		if info != "" {
+			kvp := strings.Split(info, "=")
+			if len(kvp) != 2 {
+				logger.Warnf("Could not split %s", info)
+				break
+			}
+			switch strings.ToLower(kvp[0]) {
+			case "id":
+				d.Id = kvp[1]
+			case "process":
+				d.Process = kvp[1]
+			case "cmcp_vers":
+				d.CmcpVersion = kvp[1]
+			case "cmcp_min":
+				d.CmcpMin = kvp[1]
+			case "server_vers":
+				d.ServerVersion = kvp[1]
+			case "channels":
+				d.Channels = kvp[1]
+			case "mf":
+				d.Manufacturer = kvp[1]
+			case "model":
+				d.Model = kvp[1]
+			}
+		}
+	}
+	return d, nil
+}
+
+func shorten(fqdn string) string {
+	i := strings.Index(fqdn, ".")
+	if i == -1 {
+		return fqdn
+	}
+	return fqdn[0:i]
+}
+
+func (s DefaultDeviceScanService) storeDevice(dev domain.DeviceInfo) (err error) {
+	oldDev := s.Repo.GetByName(dev.Name)
+	if oldDev != nil {
+		dev.FirstSeen = oldDev.FirstSeen
+	}
+	err = s.Repo.Store(dev)
+	return err
 }
