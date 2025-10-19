@@ -78,7 +78,7 @@ func (s DefaultDeviceScanService) ScanRun() error {
 	deviceListCount := s.Repo.Size()
 	end := time.Now().UTC()
 	dur := end.Sub(start)
-	logger.Infof("Finished device scan run #%v. Found %v devices. %v file(s) in list total. (%v)", s.Cfg.RunTime.DeviceScanNumber, deviceCount, deviceListCount, dur.String())
+	logger.Infof("Finished device scan run #%v. Found %v devices. %v device(s) in list total. (%v)", s.Cfg.RunTime.DeviceScanNumber, deviceCount, deviceListCount, dur.String())
 	s.Cfg.RunTime.Mu.Lock()
 	defer s.Cfg.RunTime.Mu.Unlock()
 	s.Cfg.RunTime.DevicesInList = deviceListCount
@@ -110,7 +110,7 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 		Timeout:             time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
 		Interface:           s.Cfg.RunTime.DeviceScanInterface,
 		Entries:             entriesCh,
-		WantUnicastResponse: false,
+		WantUnicastResponse: true,
 		DisableIPv4:         false,
 		DisableIPv6:         true,
 		Logger:              ll,
