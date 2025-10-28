@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/mdns"
 	"github.com/johannes-kuhfuss/alighieri/config"
 	"github.com/johannes-kuhfuss/alighieri/domain"
 	"github.com/johannes-kuhfuss/alighieri/repositories"
 	"github.com/johannes-kuhfuss/services_utils/logger"
-	"github.com/micro/mdns"
 	defaultroute "github.com/nixigaj/go-default-route"
 )
 
@@ -103,10 +103,10 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 		}
 	}()
 	queryParams := &mdns.QueryParam{
-		Service: s.Cfg.DeviceScan.ServiceName,
-		Domain:  "local",
-		Timeout: time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
-		//Interface:           s.Cfg.RunTime.DeviceScanInterface,
+		Service:             s.Cfg.DeviceScan.ServiceName,
+		Domain:              "local",
+		Timeout:             time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
+		Interface:           s.Cfg.RunTime.DeviceScanInterface,
 		Entries:             entriesCh,
 		WantUnicastResponse: false,
 	}
