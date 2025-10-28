@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/mdns"
+	"github.com/johannes-kuhfuss/mdns"
 	"github.com/johannes-kuhfuss/alighieri/config"
 	"github.com/johannes-kuhfuss/alighieri/domain"
 	"github.com/johannes-kuhfuss/alighieri/repositories"
