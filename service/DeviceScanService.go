@@ -110,9 +110,9 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 		Timeout:             time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
 		Interface:           s.Cfg.RunTime.DeviceScanInterface,
 		Entries:             entriesCh,
-		WantUnicastResponse: true,
+		WantUnicastResponse: false,
 		DisableIPv4:         false,
-		DisableIPv6:         true,
+		DisableIPv6:         false,
 		Logger:              ll,
 	}
 	err = mdns.Query(queryParams)

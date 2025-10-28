@@ -36,8 +36,8 @@ type AppConfig struct {
 	DeviceScan struct {
 		ScanCycleSec   int    `envconfig:"SCAN_CYCLE_SEC" default:"10"`
 		ScanTimeOutSec int    `envconfig:"SCAN_TIME_OUT_SEC" default:"5"`
-		InterfaceName  string `envconfig:"INTERFACE_NAME"`                            // Leave mepty to use default interface
-		ServiceName    string `envconfig:"SERVICE_NAME" default:"_netaudio-cmc._udp"` // _services._dns-sd._udp
+		InterfaceName  string `envconfig:"INTERFACE_NAME"`                                // Leave mepty to use default interface
+		ServiceName    string `envconfig:"SERVICE_NAME" default:"_services._dns-sd._udp"` // _services._dns-sd._udp
 		DeviceScanRun  bool
 	}
 	Misc struct {
