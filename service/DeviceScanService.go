@@ -103,10 +103,10 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 		}
 	}()
 	queryParams := &mdns.QueryParam{
-		Service:             s.Cfg.DeviceScan.ServiceName,
-		Domain:              "local",
-		Timeout:             time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
-		Interface:           s.Cfg.RunTime.DeviceScanInterface,
+		Service: s.Cfg.DeviceScan.ServiceName,
+		Domain:  "local",
+		Timeout: time.Duration(s.Cfg.DeviceScan.ScanTimeOutSec) * time.Second,
+		//Interface:           s.Cfg.RunTime.DeviceScanInterface,
 		Entries:             entriesCh,
 		WantUnicastResponse: false,
 	}
