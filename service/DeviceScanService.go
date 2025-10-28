@@ -2,6 +2,7 @@
 package service
 
 import (
+	"log"
 	"net"
 	"strings"
 	"time"
@@ -102,6 +103,8 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 			}
 		}
 	}()
+
+	ll := log.New(logger.GetLogger(), "mdns", 0)
 	queryParams := &mdns.QueryParam{
 		Service:             s.Cfg.DeviceScan.ServiceName,
 		Domain:              "local",
@@ -109,6 +112,9 @@ func (s DefaultDeviceScanService) scanDevices() (deviceCount int, err error) {
 		Interface:           s.Cfg.RunTime.DeviceScanInterface,
 		Entries:             entriesCh,
 		WantUnicastResponse: false,
+		DisableIPv4:         false,
+		DisableIPv6:         false,
+		Logger:              ll,
 	}
 	err = mdns.Query(queryParams)
 	if err != nil {
